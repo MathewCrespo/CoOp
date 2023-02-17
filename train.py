@@ -26,6 +26,16 @@ import datasets.imagenet_r
 import trainers.coop
 import trainers.cocoop
 import trainers.zsclip
+import trainers.plot
+import trainers.plot_v1
+import trainers.plot_v2
+import trainers.plot_diverse
+import trainers.plot_FMDiverse
+import trainers.plot_views
+import trainers.plot_graph
+import trainers.plot_graph_share
+import trainers.plot_graph_share_alpha
+import trainers.plot_diverse_graph
 
 
 def print_args(args, cfg):
@@ -54,6 +64,9 @@ def reset_cfg(cfg, args):
 
     if args.seed:
         cfg.SEED = args.seed
+        
+    if args.N:
+        cfg.MODEL.N=args.N
 
     if args.source_domains:
         cfg.DATASET.SOURCE_DOMAINS = args.source_domains
@@ -100,6 +113,9 @@ def extend_cfg(cfg):
     cfg.TRAINER.COCOOP.PREC = "fp16"  # fp16, fp32, amp
 
     cfg.DATASET.SUBSAMPLE_CLASSES = "all"  # all, base or new
+    
+    cfg.MODEL.ENSM = 'gwd'
+    cfg.MODEL.alpha = 0.5
 
 
 def setup_cfg(args):
@@ -120,7 +136,19 @@ def setup_cfg(args):
     # 4. From optional input arguments
     cfg.merge_from_list(args.opts)
 
+    if cfg.DATASET.NUM_SHOTS == 1:
+        cfg.OPTIM.MAX_EPOCH=50
+    elif cfg.DATASET.NUM_SHOTS == 2 or cfg.DATASET.NUM_SHOTS ==4:
+        cfg.OPTIM.MAX_EPOCH=100
+    else:
+        cfg.OPTIM.MAX_EPOCH=200
+
+    if cfg.DATASET.NAME== "ImageNet":
+        cfg.OPTIM.MAX_EPOCH=50
+
     cfg.freeze()
+
+    
 
     return cfg
 
@@ -162,6 +190,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--seed", type=int, default=-1, help="only positive value enables a fixed seed"
+    )
+    parser.add_argument(
+        "--N", type=int, default=4, help="number of N"
     )
     parser.add_argument(
         "--source-domains", type=str, nargs="+", help="source domains for DA/DG"

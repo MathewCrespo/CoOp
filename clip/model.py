@@ -87,7 +87,7 @@ class AttentionPool2d(nn.Module):
             need_weights=False
         )
 
-        return x[0]
+        return x  ## return x not x[0] to get all feature maps
 
 
 class ModifiedResNet(nn.Module):

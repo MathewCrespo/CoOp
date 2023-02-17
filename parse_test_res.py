@@ -68,7 +68,12 @@ def parse_function(*metrics, directory="", args=None, end_signal=None):
     outputs = []
 
     for subdir in subdirs:
-        fpath = osp.join(directory, subdir, "log.txt")
+        file_name = listdir_nohidden(osp.join(directory, subdir), sort=True)
+        log_name = ''
+        for f in file_name:
+            if f.startswith('log'):
+                log_name = f
+        fpath = osp.join(directory, subdir, log_name)
         assert check_isfile(fpath)
         good_to_go = False
         output = OrderedDict()
